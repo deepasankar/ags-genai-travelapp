@@ -1,0 +1,89 @@
+openapi: 3.0.3
+info:
+  title: Nationalize API
+  description: |
+    Predict nationality probabilities for a given name. This OpenAPI spec models the public
+    Nationalize API: GET https://api.nationalize.io/?name=... (supports single and batch queries).
+  version: "1.0.0"
+servers:
+  - url: https://api.nationalize.io
+paths:
+  /:
+    get:
+      summary: Predict nationality from a given name
+      description: |
+        Returns nationality prediction(s) for the provided name(s). Use `name` for a single
+        name (e.g. `?name=peter`) or pass multiple `name[]` to request up to 10 names in one call.
+      parameters:
+        - name: name
+          in: query
+          description: Single name to predict nationality for. If provided, response is a single prediction object.
+          required: false
+          schema:
+            type: string
+            example: michael
+        - name: name[]
+          in: query
+          description: Multiple names (batch mode). Up to 10 names per request (each counts against rate limits).
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+            example: ["michael","sarah"]
+      responses:
+        "200":
+          description: Successful nationality prediction
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Prediction'        # single prediction object
+                  - type: array                                     # batch: array of prediction objects
+                    items:
+                      $ref: '#/components/schemas/Prediction'
+        "422":
+          description: Unprocessable content (missing or invalid 'name' parameter)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missing_name:
+                  value:
+                    error: "Missing 'name' parameter"
+                invalid_name:
+                  value:
+                    error: "Invalid 'name' parameter"
+components:
+  schemas:
+    CountryProbability:
+      type: object
+      properties:
+        country_id:
+          type: string
+          description: ISO 3166-1 alpha-2 country code.
+          example: US
+        probability:
+          type: number
+          format: float
+          description: Probability that the name belongs to the given country (0..1).
+          example: 0.089
+    Prediction:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The input name that was predicted.
+          example: michael
+        country:
+          type: array
+          description: List of country probability objects (top matches).
+          items:
+            $ref: '#/components/schemas/CountryProbability'
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Invalid API key"
