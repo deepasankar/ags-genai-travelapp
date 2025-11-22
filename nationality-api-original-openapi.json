@@ -1,8 +1,8 @@
-﻿{
+{
   "openapi": "3.0.3",
   "info": {
     "title": "Nationalize API",
-    "description": "Predict nationality probabilities for a given name. This OpenAPI spec models the public\nNationalize API: GET https://api.nationalize.io/?name=... (supports single and batch queries).\n",
+    "description": "Predict nationality probabilities for a given name. This OpenAPI spec models the public Nationalize API: GET https://api.nationalize.io/?name=... (supports single and batch queries).",
     "version": "1.0.0"
   },
   "servers": [
@@ -14,7 +14,7 @@
     "/": {
       "get": {
         "summary": "Predict nationality from a given name",
-        "description": "Returns nationality prediction(s) for the provided name(s). Use `name` for a single\nname (e.g. `?name=peter`) or pass multiple `name[]` to request up to 10 names in one call.\n",
+        "description": "Returns nationality prediction(s) for the provided name(s). Use `name` for a single name or pass multiple `name[]` to request up to 10 names in one call.",
         "parameters": [
           {
             "name": "name",
@@ -29,17 +29,23 @@
           {
             "name": "name[]",
             "in": "query",
-            "description": "Multiple names (batch mode). Up to 10 names per request (each counts against rate limits).",
+            "description": "Multiple names (batch mode). Up to 10 names per request.",
             "required": false,
             "schema": {
               "type": "array",
               "items": {
                 "type": "string"
               },
-              "example": [
-                "michael",
-                "sarah"
-              ]
+              "example": ["michael", "sarah"]
+            }
+          },
+          {
+            "name": "apikey",
+            "in": "query",
+            "description": "Optional API key for higher quota usage.",
+            "required": false,
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -64,6 +70,32 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized - invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Invalid API key"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required (subscription inactive)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Subscription is not active"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Unprocessable content (missing or invalid 'name' parameter)",
             "content": {
@@ -82,6 +114,19 @@
                       "error": "Invalid 'name' parameter"
                     }
                   }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests / rate limit reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Request limit reached"
                 }
               }
             }
@@ -134,6 +179,14 @@
           }
         }
       }
+    },
+    "securitySchemes": {
+      "ApiKeyQuery": {
+        "type": "apiKey",
+        "in": "query",
+        "name": "apikey"
+      }
     }
-  }
+  },
+  "security": []
 }
