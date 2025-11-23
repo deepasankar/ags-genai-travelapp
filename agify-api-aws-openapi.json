@@ -1,0 +1,129 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Agify API",
+    "version": "1.0.0",
+    "description": "Simple API that predicts age based on a given name.",
+    "contact": {
+      "name": "Deepa Sankaranarayanan"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://y721jj00sg.execute-api.ap-south-2.amazonaws.com/demo-stage"
+    }
+  ],
+  "tags": [
+    {
+      "name": "predict_age",
+      "description": "Predict the age of an individual from the given name"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "predictAgeByName",
+        "tags": [
+          "predict_age"
+        ],
+        "summary": "Predict age by name",
+        "description": "Predict the average age for a given name. Optionally filter by country or set a maximum age.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "description": "The name to predict the age for.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "country_id",
+            "in": "query",
+            "required": false,
+            "description": "Optional country code (ISO 3166-1 alpha-2) to localize the prediction.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "max_age",
+            "in": "query",
+            "required": false,
+            "description": "Optional maximum age filter.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with predicted age.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgePrediction"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., missing name)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AgePrediction": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name for which the age prediction is to be done.",
+            "example": "Michael"
+          },
+          "age": {
+            "type": "integer",
+            "nullable": true,
+            "example": 32
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of data points used to derive the prediction.",
+            "example": 500
+          },
+          "country_id": {
+            "type": "string",
+            "description": "Country filter used (if any).",
+            "example": "US"
+          }
+        },
+        "required": [
+          "name",
+          "age",
+          "count"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Missing 'name' parameter"
+          }
+        }
+      }
+    }
+  }
+}
