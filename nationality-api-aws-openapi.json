@@ -6,12 +6,7 @@
     "version" : "1.0.0"
   },
   "servers" : [ {
-    "url" : "https://xhiir7ri3f.execute-api.ap-south-2.amazonaws.com/nationality-api",
-    "variables" : {
-      "basePath" : {
-        "default" : "nationality-api"
-      }
-    }
+    "url" : "https://xhiir7ri3f.execute-api.ap-south-2.amazonaws.com/nationality-api"
   } ],
   "paths" : {
     "/" : {
